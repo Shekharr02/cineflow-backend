@@ -1,6 +1,7 @@
 package com.cineflow.controller;
 
 import com.cineflow.dto.LoginRequest;
+import com.cineflow.dto.LoginResponse;
 import com.cineflow.dto.UserRequest;
 
 import com.cineflow.dto.UserResponse;
@@ -22,9 +23,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public  ResponseEntity<UserResponse> login (@RequestBody LoginRequest request){
+    public  ResponseEntity<LoginResponse> login (@RequestBody LoginRequest request){
         return ResponseEntity.ok(userService.login(request));
-
     }
 
 }

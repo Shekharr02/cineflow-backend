@@ -1,6 +1,7 @@
 package com.cineflow.service;
 
 import com.cineflow.dto.LoginRequest;
+import com.cineflow.dto.LoginResponse;
 import com.cineflow.dto.UserRequest;
 import com.cineflow.dto.UserResponse;
 import com.cineflow.entity.User;
@@ -8,6 +9,7 @@ import com.cineflow.exception.InvalidCredentialsException;
 import com.cineflow.exception.UserAlreadyExistsException;
 import com.cineflow.exception.UserNotFoundException;
 import com.cineflow.repository.UserRepository;
+import com.cineflow.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public UserResponse register (UserRequest request){
@@ -35,17 +39,15 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserResponse login(LoginRequest request){
+    public LoginResponse login(LoginRequest request){
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()-> new UserNotFoundException("User not found"));
         if(!user.getPassword().equals(request.getPassword())){
             throw new InvalidCredentialsException("Invalid password");
         }
-        return new UserResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail()
-        );
+        String token = jwtUtil.generateToken(user.getEmail());
+        System.out.println("TOKEN: "+ token);
+        return new LoginResponse(token);
     }
 
 }
