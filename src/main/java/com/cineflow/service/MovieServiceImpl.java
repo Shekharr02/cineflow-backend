@@ -6,6 +6,9 @@ import com.cineflow.entity.Movie;
 import com.cineflow.repository.MovieRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -80,5 +83,18 @@ public class MovieServiceImpl implements MovieService{
                 .stream()
                 .map(movie -> modelMapper.map(movie, MovieResponse.class))
                 .toList();
+    }
+
+    @Override
+    public Page<MovieResponse> getAllMovies(int page, int size){
+        Pageable pageable = PageRequest.of(page,size);
+
+        Page<Movie> moviePage = movieRepository.findAll(pageable);
+
+        return moviePage.map(movie->{
+            MovieResponse response = modelMapper.map(movie, MovieResponse.class);
+            response.setLanguages(movie.getLanguages());
+            return response;
+        });
     }
 }

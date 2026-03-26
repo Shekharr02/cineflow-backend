@@ -4,6 +4,7 @@ import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
 import com.cineflow.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +22,11 @@ public class MovieController {
     }
 
     @GetMapping
-    public List<MovieResponse> getAllMovies (){
-        return movieService.getAllMovies();
+    public Page<MovieResponse> getAllMovies (
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size){
+
+        return movieService.getAllMovies(page, size);
     }
 
     @GetMapping("/{id}")

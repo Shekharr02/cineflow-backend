@@ -2,6 +2,7 @@ package com.cineflow.service;
 
 import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface MovieService {
     List<MovieResponse> getMoviesByLanguage(String genre);
 
     List<MovieResponse> getMoviesByRating(Double rating);
+
+    Page<MovieResponse> getAllMovies(int page, int size);
 }
