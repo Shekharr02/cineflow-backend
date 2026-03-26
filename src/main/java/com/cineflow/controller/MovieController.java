@@ -5,6 +5,7 @@ import com.cineflow.dto.MovieResponse;
 import com.cineflow.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,16 +25,26 @@ public class MovieController {
     @GetMapping
     public Page<MovieResponse> getAllMovies (
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size){
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction){
 
-        return movieService.getAllMovies(page, size);
+        return movieService.getAllMovies(page, size,sortBy,direction);
     }
 
     @GetMapping("/{id}")
     public MovieResponse getMovieById(@PathVariable Long id){
+
         return movieService.getMovieById(id);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<MovieResponse> updateMovie(
+            @PathVariable Long id,
+            @RequestBody MovieRequest request)
+    {
+        return ResponseEntity.ok(movieService.updateMovie(id, request));
+    }
     @DeleteMapping("/{id}")
     public String deleteMovie(@PathVariable Long id){
         movieService.deleteMovie(id);

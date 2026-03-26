@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,14 +32,6 @@ public class MovieServiceImpl implements MovieService{
     }
 
     @Override
-    public List<MovieResponse> getAllMovies(){
-       return movieRepository.findAll()
-               .stream()
-               .map(movie -> modelMapper.map(movie, MovieResponse.class))
-               .toList();
-    }
-
-    @Override
     public MovieResponse getMovieById(Long id){
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException("Movie not found"));
@@ -47,7 +40,32 @@ public class MovieServiceImpl implements MovieService{
 
     @Override
     public void deleteMovie(Long id){
+
         movieRepository.deleteById(id);
+    }
+
+    @Override
+    public MovieResponse updateMovie(Long id, MovieRequest request){
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException(("Movie not found with id: "+id)));
+
+        movie.setTitle(request.getTitle());
+        movie.setGenre(request.getGenre());
+        movie.setDuration(request.getDuration());
+        movie.setRating(request.getRating());
+        movie.setLanguages(request.getLanguages());
+        movie.setCensorRating(request.getCensorRating());
+        movie.setDescription(request.getDescription());
+        movie.setReleaseDate(request.getReleaseDate());
+        movie.setImageUrl(request.getImageUrl());
+
+        Movie updated = movieRepository.save(movie);
+
+        MovieResponse response = modelMapper.map(updated, MovieResponse.class);
+
+        response.setLanguages(updated.getLanguages());
+
+        return response;
     }
 
     @Override
@@ -86,8 +104,13 @@ public class MovieServiceImpl implements MovieService{
     }
 
     @Override
-    public Page<MovieResponse> getAllMovies(int page, int size){
-        Pageable pageable = PageRequest.of(page,size);
+    public Page<MovieResponse> getAllMovies(int page, int size, String sortBy, String direction){
+
+        Sort sort = direction.equalsIgnoreCase("desc")?
+                Sort.by(sortBy).descending():
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Movie> moviePage = movieRepository.findAll(pageable);
 

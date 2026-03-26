@@ -10,9 +10,9 @@ public interface MovieService {
 
     MovieResponse addMovie(MovieRequest request);
 
-    List<MovieResponse> getAllMovies();
-
     MovieResponse getMovieById(Long id);
+
+    MovieResponse updateMovie(Long id, MovieRequest request);
 
     void deleteMovie(Long id);
 
@@ -24,5 +24,5 @@ public interface MovieService {
 
     List<MovieResponse> getMoviesByRating(Double rating);
 
-    Page<MovieResponse> getAllMovies(int page, int size);
+    Page<MovieResponse> getAllMovies(int page, int size, String sortBy, String direction);
 }
