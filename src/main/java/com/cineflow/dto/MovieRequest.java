@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class MovieRequest {
-    private String title;
+    private String name;
     private String genre;
     private int duration;
     private double rating;

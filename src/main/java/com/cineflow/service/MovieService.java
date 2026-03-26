@@ -2,6 +2,7 @@ package com.cineflow.service;
 
 import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
+import com.cineflow.entity.Movie;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -16,13 +17,13 @@ public interface MovieService {
 
     void deleteMovie(Long id);
 
-    List<MovieResponse> searchMovies(String title);
-
-    List<MovieResponse> getMoviesByGenre(String genre);
-
-    List<MovieResponse> getMoviesByLanguage(String genre);
-
-    List<MovieResponse> getMoviesByRating(Double rating);
-
-    Page<MovieResponse> getAllMovies(int page, int size, String sortBy, String direction);
+    Page<MovieResponse> filterMovies(
+            String name,
+            String genre,
+            String language,
+            Double rating,
+            int page,
+            int size,
+            String sortBy,
+            String direction);
 }

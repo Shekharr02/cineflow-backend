@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class MovieResponse {
     private Long id;
-    private String title;
+    private String name;
     private String genre;
     private int duration;
     private double rating;

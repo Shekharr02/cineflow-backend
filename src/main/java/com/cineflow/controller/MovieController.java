@@ -21,18 +21,10 @@ public class MovieController {
 
     @PostMapping("/add")
     public MovieResponse addMovie(@RequestBody MovieRequest request){
+
         return movieService.addMovie(request);
     }
 
-    @GetMapping
-    public Page<MovieResponse> getAllMovies (
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction){
-
-        return movieService.getAllMovies(page, size,sortBy,direction);
-    }
 
     @GetMapping("/{id}")
     public MovieResponse getMovieById(@PathVariable Long id){
@@ -53,23 +45,19 @@ public class MovieController {
         return "Movie deleted successfully";
     }
 
-    @GetMapping("/search")
-    public List<MovieResponse> searchMovies(@RequestParam String title){
-        return movieService.searchMovies(title);
+    @GetMapping
+    public Page<MovieResponse> getMovies(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) Double rating,
+
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ){
+        return movieService.filterMovies(name, genre, language, rating, page, size, sortBy, direction);
     }
 
-    @GetMapping("/genre")
-    public List<MovieResponse> getByGenre(@RequestParam String genre){
-        return movieService.getMoviesByGenre(genre);
-    }
-
-    @GetMapping("/language")
-    public List<MovieResponse> getByLanguage(@RequestParam String language){
-        return movieService.getMoviesByLanguage(language);
-    }
-
-    @GetMapping("/rating")
-    public List<MovieResponse> getByRating(@RequestParam double rating){
-        return movieService.getMoviesByRating(rating);
-    }
 }
