@@ -10,6 +10,7 @@ import com.cineflow.exception.UserAlreadyExistsException;
 import com.cineflow.exception.UserNotFoundException;
 import com.cineflow.repository.UserRepository;
 import com.cineflow.security.JwtUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public UserResponse register (UserRequest request){
@@ -48,6 +51,14 @@ public class UserServiceImpl implements UserService{
         String token = jwtUtil.generateToken(user.getEmail());
         System.out.println("TOKEN: "+ token);
         return new LoginResponse(token);
+    }
+
+    @Override
+    public UserResponse getUserByEmail(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new UserNotFoundException("User not found"));
+
+        return modelMapper.map(user, UserResponse.class);
     }
 
 }

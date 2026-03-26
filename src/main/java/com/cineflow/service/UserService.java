@@ -10,4 +10,6 @@ public interface UserService {
 
     LoginResponse login (LoginRequest request);
 
+    UserResponse getUserByEmail(String email);
+
 }
