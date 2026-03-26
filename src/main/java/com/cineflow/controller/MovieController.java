@@ -3,6 +3,7 @@ package com.cineflow.controller;
 import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
 import com.cineflow.service.MovieService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/movies")
+@SecurityRequirement(name = "bearerAuth")
 public class MovieController {
 
     @Autowired

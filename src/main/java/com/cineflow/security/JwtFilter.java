@@ -28,6 +28,11 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
+
+        if(path.contains("/swagger-ui")||path.contains("v3/api-docs")){
+            filterChain.doFilter(request, response);
+            return;
+        }
         if(path.contains("/users/login") || path.contains("users/register")){
             filterChain.doFilter(request, response);
             return;
