@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +32,10 @@ public class UserController {
         return ResponseEntity.ok(userService.login(request));
     }
 
-    public UserResponse getCurrentUser(Authentication authentication){
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication){
         String email = authentication.getName();
-        return userService.getUserByEmail(email);
+        return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 }

@@ -15,9 +15,10 @@ public class JwtUtil {
     private final String SECRET = "mysecretkeymysecretkeymysecretkey123";
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String role) {
         return Jwts.builder()
                 .subject(email)
+                .claim("role",role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(key)
@@ -34,6 +35,14 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
+    public String extractRole(String token){
+        Claims claims = Jwts.parser().
+                verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("role", String.class);
+    }
     public boolean validateToken(String token) {
         try {
             Jwts.parser()

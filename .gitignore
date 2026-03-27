@@ -31,3 +31,29 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secrets ###
+application.properties
+application.yml
+.env
+
+### Logs ###
+*.log
+logs/
+
+### OS files ###
+.DS_Store
+Thumbs.db
+
+### Java artifacts
+*.class
+*.jar
+*.war
+*.ear
+
+### Build caches ###
+.gradle/
+.mvn/timing.properties
+
+### Coverage ##
+coverage/

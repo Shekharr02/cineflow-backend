@@ -5,6 +5,7 @@ import com.cineflow.dto.LoginResponse;
 import com.cineflow.dto.UserRequest;
 import com.cineflow.dto.UserResponse;
 import com.cineflow.entity.User;
+import com.cineflow.enums.Role;
 import com.cineflow.exception.InvalidCredentialsException;
 import com.cineflow.exception.UserAlreadyExistsException;
 import com.cineflow.exception.UserNotFoundException;
@@ -32,6 +33,7 @@ public class UserServiceImpl implements UserService{
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
+        user.setRole(Role.USER);
 
         User savedUser = userRepository.save(user);
         return new UserResponse(
@@ -48,9 +50,8 @@ public class UserServiceImpl implements UserService{
         if(!user.getPassword().equals(request.getPassword())){
             throw new InvalidCredentialsException("Invalid password");
         }
-        String token = jwtUtil.generateToken(user.getEmail());
-        System.out.println("TOKEN: "+ token);
-        return new LoginResponse(token);
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        return new LoginResponse(token, user.getEmail(),user.getRole().name());
     }
 
     @Override
