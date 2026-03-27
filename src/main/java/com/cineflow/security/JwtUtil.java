@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -12,8 +13,11 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "mysecretkeymysecretkeymysecretkey123";
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    @Value("${jwt.secret}")
+    private String SECRET;
+    private SecretKey getKey() {
+        return Keys.hmacShaKeyFor(SECRET.getBytes());
+    }
 
     public String generateToken(String email, String role) {
         return Jwts.builder()
@@ -21,13 +25,13 @@ public class JwtUtil {
                 .claim("role",role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(key)
+                .signWith(getKey())
                 .compact();
     }
 
     public String extractEmail(String token) {
         Claims claims = Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(getKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -37,7 +41,7 @@ public class JwtUtil {
 
     public String extractRole(String token){
         Claims claims = Jwts.parser().
-                verifyWith(key)
+                verifyWith(getKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -46,7 +50,7 @@ public class JwtUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                    .verifyWith(key)
+                    .verifyWith(getKey())
                     .build()
                     .parseSignedClaims(token);
             return true;
