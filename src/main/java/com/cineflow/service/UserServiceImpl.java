@@ -13,11 +13,14 @@ import com.cineflow.repository.UserRepository;
 import com.cineflow.security.JwtUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService{
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -32,7 +35,7 @@ public class UserServiceImpl implements UserService{
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode( request.getPassword()));
         user.setRole(Role.USER);
 
         User savedUser = userRepository.save(user);
@@ -47,7 +50,7 @@ public class UserServiceImpl implements UserService{
     public LoginResponse login(LoginRequest request){
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()-> new UserNotFoundException("User not found"));
-        if(!user.getPassword().equals(request.getPassword())){
+        if(!passwordEncoder.matches(request.getPassword(),user.getPassword())){
             throw new InvalidCredentialsException("Invalid password");
         }
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());

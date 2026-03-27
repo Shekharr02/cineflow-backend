@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Configuration;
             title = "Cineflow - Movie Booking System API",
             version = "1.0",
             description = "Backend APIs for Movie Booking System (Users, Movies, Bookings)"
-        )
+        ),
+        security = @io.swagger.v3.oas.annotations.security.SecurityRequirement(name="bearerAuth")
 )
 @SecurityScheme(
         name = "bearerAuth",

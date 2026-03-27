@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,14 @@ public class JwtUtil {
 
     @Value("${jwt.secret}")
     private String SECRET;
-    private SecretKey getKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+
+    private SecretKey key;
+
+    private final long EXPIRATION = 1000 * 60 * 60;
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
     public String generateToken(String email, String role) {
@@ -24,38 +31,32 @@ public class JwtUtil {
                 .subject(email)
                 .claim("role",role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(getKey())
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .signWith(key)
                 .compact();
     }
 
     public String extractEmail(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
-        return claims.getSubject();
+        return getClaims(token).getSubject();
     }
 
     public String extractRole(String token){
-        Claims claims = Jwts.parser().
-                verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claims.get("role", String.class);
+        return getClaims(token).get("role", String.class);
     }
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .verifyWith(getKey())
-                    .build()
-                    .parseSignedClaims(token);
+            getClaims(token);
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private Claims getClaims(String token){
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
