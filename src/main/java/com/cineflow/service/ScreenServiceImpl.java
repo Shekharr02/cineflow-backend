@@ -72,7 +72,8 @@ public class ScreenServiceImpl implements ScreenService{
         }
         return sb.toString();
     }
-    private void createSeatsForScreen(Screen screen){
+    @Transactional
+    public void createSeatsForScreen(Screen screen){
         int capacity = screen.getCapacity();
         int seatsPerRow = 15;
 

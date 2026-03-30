@@ -29,73 +29,54 @@ public class BookingServiceImpl implements BookingService{
 
     @Override
     @Transactional(timeout = 5)
-    public BookingResponse bookTickets(BookingRequest request){
+    public BookingResponse bookTickets(BookingRequest request) {
         String email = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getName();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()-> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Show show = showRepository.findById(request.getShowId())
-                .orElseThrow(()-> new RuntimeException("Show not found"));
+                .orElseThrow(() -> new RuntimeException("Show not found"));
 
         Set<Long> uniqueSeats = new HashSet<>(request.getShowSeatIds());
-        if(uniqueSeats.size() != request.getShowSeatIds().size()){
+        if (uniqueSeats.size() != request.getShowSeatIds().size()) {
             throw new RuntimeException("Duplicate seats selected");
         }
         List<ShowSeat> seats = showSeatRepository.findAllByIdWithLock(request.getShowSeatIds());
-        if(seats.size() != request.getShowSeatIds().size()){
+
+        if (seats.size() != request.getShowSeatIds().size()) {
             throw new RuntimeException("Invalid seats selected");
         }
 
-        for(ShowSeat seat : seats){
-            if(!seat.getShow().getId().equals(show.getId())){
+        for (ShowSeat seat : seats) {
+            if (!seat.getShow().getId().equals(show.getId())) {
                 throw new RuntimeException("Seat does not belong to this show");
             }
-            if(seat.getStatus() != ShowSeatStatus.AVAILABLE ){
-                throw new RuntimeException("Seat not available: "+seat.getId());
+            if (seat.getStatus() != ShowSeatStatus.AVAILABLE) {
+                throw new RuntimeException("Seat not available: " + seat.getId());
             }
+            seat.setStatus(ShowSeatStatus.HELD);
+            seat.setLockedAt(LocalDateTime.now());
+            seat.setLockedBy(user);
         }
+        showSeatRepository.saveAll(seats);
         double total = seats.stream()
                 .mapToDouble(ShowSeat::getPrice)
                 .sum();
-        for(ShowSeat seat : seats){
-            seat.setStatus(ShowSeatStatus.BOOKED);
-        }
-        showSeatRepository.saveAll(seats);
 
-        Booking booking = new Booking();
-        booking.setUser(user);
-        booking.setShow(show);
-        booking.setBookingTime(LocalDateTime.now());
-        booking.setTotalAmount(total);
-        booking.setStatus(BookingStatus.CONFIRMED);
+        List<String> seatNumbers = seats.stream().map(
+                s -> s.getSeat().getSeatNumber()).toList();
 
-        List<BookingSeat> bookingSeats = new ArrayList<>();
-        for(ShowSeat seat : seats){
-            BookingSeat bs = new BookingSeat();
-            bs.setBooking(booking);
-            bs.setShowSeat(seat);
-            bs.setPrice(seat.getPrice());
-
-            bookingSeats.add(bs);
-        }
-        booking.setBookingSeats(bookingSeats);
-
-        Booking saved = bookingRepository.save(booking);
-
-        List<String> seatNumbers = bookingSeats.stream()
-                .map(bs-> bs.getShowSeat().getSeat().getSeatNumber())
-                .toList();
-        return new BookingResponse(
-                saved.getId(),
+        return new BookingResponse(null,
                 show.getMovie().getName(),
                 show.getScreen().getTheatre().getName(),
                 show.getShowTime(),
                 seatNumbers,
-                total
+                total,
+                BookingStatus.PENDING
         );
     }
 
@@ -109,7 +90,8 @@ public class BookingServiceImpl implements BookingService{
                 b.getShow().getShowTime(),
                 b.getBookingSeats().stream().map(bs->
                         bs.getShowSeat().getSeat().getSeatNumber()).toList(),
-                b.getTotalAmount()
+                b.getTotalAmount(),
+                b.getStatus()
         )).toList();
     }
 
@@ -126,10 +108,82 @@ public class BookingServiceImpl implements BookingService{
 
         for(ShowSeat seat : seats){
             seat.setStatus(ShowSeatStatus.AVAILABLE);
+            seat.setLockedAt(null);
         }
         showSeatRepository.saveAll(seats);
 
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public BookingResponse confirmBooking(List<Long> showSeatIds) {
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<ShowSeat> seats = showSeatRepository.findAllByIdWithLock(showSeatIds);
+
+        if (seats.size() != showSeatIds.size()) {
+            throw new RuntimeException("Invalid seats selected");
+        }
+
+        Show show = seats.get(0).getShow();
+
+        for (ShowSeat seat : seats) {
+            if (seat.getStatus() != ShowSeatStatus.HELD) {
+                throw new RuntimeException("Seat not held: " + seat.getId());
+            }
+
+            if (! seat.getLockedBy().getId().equals(user.getId())){
+                throw new RuntimeException("Seat held by another user: "+seat.getId());
+            }
+            if (seat.getLockedAt() == null || seat.getLockedAt().isBefore(LocalDateTime.now().minusMinutes(5))) {
+                throw new RuntimeException("Seat hold expired: " + seat.getId());
+            }
+            seat.setStatus(ShowSeatStatus.BOOKED);
+            seat.setLockedAt(null);
+        }
+        showSeatRepository.saveAll(seats);
+        double total = seats.stream()
+                .mapToDouble(ShowSeat::getPrice)
+                .sum();
+
+        Booking booking = new Booking();
+        booking.setUser(user);
+        booking.setShow(show);
+        booking.setBookingTime(LocalDateTime.now());
+        booking.setTotalAmount(total);
+        booking.setStatus(BookingStatus.CONFIRMED);
+
+        List<BookingSeat> bookingSeats = new ArrayList<>();
+
+        for (ShowSeat seat : seats) {
+            BookingSeat bs = new BookingSeat();
+            bs.setBooking(booking);
+            bs.setShowSeat(seat);
+            bs.setPrice(seat.getPrice());
+            bookingSeats.add(bs);
+        }
+
+        booking.setBookingSeats(bookingSeats);
+
+        Booking saved = bookingRepository.save(booking);
+
+        List<String> seatNumbers = bookingSeats.stream().map(bs ->
+                bs.getShowSeat().getSeat().getSeatNumber()).toList();
+
+        return new BookingResponse(saved.getId(),
+                show.getMovie().getName(),
+                show.getScreen().getTheatre().getName(),
+                show.getShowTime(),
+                seatNumbers,
+                total,
+                BookingStatus.CONFIRMED
+        );
     }
 }

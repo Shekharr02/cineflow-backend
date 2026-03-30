@@ -1,5 +1,8 @@
 package com.cineflow.dto;
 
+import com.cineflow.enums.BookingStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +23,7 @@ public class BookingResponse {
     private LocalDateTime showTime;
     private List<String> seats;
     private double totalAmount;
+
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status;
 }

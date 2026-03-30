@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"show_id", "seat_id"}))
 @Getter
@@ -27,4 +29,10 @@ public class ShowSeat {
 
     @Enumerated(EnumType.STRING)
     private ShowSeatStatus status;
+
+    private LocalDateTime lockedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "locked_by")
+    private User lockedBy;
 }
