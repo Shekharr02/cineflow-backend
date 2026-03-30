@@ -40,8 +40,4 @@ public class BookingController {
         return ResponseEntity.ok("Booking cancelled");
     }
 
-    @PostMapping("/confirm")
-    public ResponseEntity<BookingResponse> confirm(@RequestBody List<Long> showSeatIds){
-        return ResponseEntity.ok(bookingService.confirmBooking(showSeatIds));
-    }
 }

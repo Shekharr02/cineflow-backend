@@ -1,6 +1,7 @@
 package com.cineflow.entity;
 
 import com.cineflow.enums.BookingStatus;
+import com.cineflow.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,4 +39,9 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
+    private String paymentId;
 }
