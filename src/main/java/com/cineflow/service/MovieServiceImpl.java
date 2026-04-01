@@ -3,6 +3,7 @@ package com.cineflow.service;
 import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
 import com.cineflow.entity.Movie;
+import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.MovieRepository;
 import com.cineflow.specification.MovieSpecification;
 import org.modelmapper.ModelMapper;
@@ -36,20 +37,21 @@ public class MovieServiceImpl implements MovieService{
     @Override
     public MovieResponse getMovieById(Long id){
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Movie not found"));
+                .orElseThrow(()-> new CineflowException("movie.not.available"));
         return modelMapper.map(movie, MovieResponse.class);
     }
 
     @Override
     public void deleteMovie(Long id){
-
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(()-> new CineflowException("movie.not.available"));
         movieRepository.deleteById(id);
     }
 
     @Override
     public MovieResponse updateMovie(Long id, MovieRequest request){
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException(("Movie not found with id: "+id)));
+                .orElseThrow(()-> new CineflowException("movie.not.available"));
 
         movie.setName(request.getName());
         movie.setGenre(request.getGenre());

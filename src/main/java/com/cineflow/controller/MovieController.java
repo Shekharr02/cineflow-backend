@@ -21,14 +21,12 @@ public class MovieController {
 
     @PostMapping("/add")
     public MovieResponse addMovie(@RequestBody MovieRequest request){
-
         return movieService.addMovie(request);
     }
 
 
     @GetMapping("/{id}")
     public MovieResponse getMovieById(@PathVariable Long id){
-
         return movieService.getMovieById(id);
     }
 
@@ -42,7 +40,7 @@ public class MovieController {
     @DeleteMapping("/{id}")
     public String deleteMovie(@PathVariable Long id){
         movieService.deleteMovie(id);
-        return "Movie deleted successfully";
+        return "movie.deleted";
     }
 
     @GetMapping

@@ -1,6 +1,7 @@
 package com.cineflow.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,9 +9,11 @@ import lombok.Setter;
 @Setter
 public class TheatreRequest {
 
-    @NotBlank(message = "Theatre name is required")
+    @NotBlank(message = "{theatre.name.blank}")
+    @Size(max=100, message="{theatre.name.length}")
     private String name;
 
-    @NotBlank(message = "Location is required")
+    @NotBlank(message = "{theatre.location.blank}")
+    @Size(max=100, message = "{theatre.location.length}")
     private String location;
 }

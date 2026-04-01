@@ -3,6 +3,7 @@ package com.cineflow.controller;
 import com.cineflow.dto.BookingRequest;
 import com.cineflow.dto.BookingResponse;
 import com.cineflow.entity.User;
+import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.UserRepository;
 import com.cineflow.service.BookingService;
 import lombok.RequiredArgsConstructor;
@@ -29,15 +30,15 @@ public class BookingController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()-> new RuntimeException("User not found"));
+                .orElseThrow(()-> new CineflowException("user.not.found"));
 
         return ResponseEntity.ok(bookingService.getUserBookings(user.getId()));
     }
 
     @PutMapping("/{bookingId}/cancel")
-    public ResponseEntity<String> cancel(@PathVariable Long bookingId){
+    public ResponseEntity<Void> cancel(@PathVariable Long bookingId){
         bookingService.cancelBooking(bookingId);
-        return ResponseEntity.ok("Booking cancelled");
+        return ResponseEntity.noContent().build();
     }
 
 }

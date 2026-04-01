@@ -7,6 +7,7 @@ import com.cineflow.entity.User;
 import com.cineflow.enums.BookingStatus;
 import com.cineflow.enums.PaymentStatus;
 import com.cineflow.enums.ShowSeatStatus;
+import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.BookingRepository;
 import com.cineflow.repository.ShowSeatRepository;
 import com.cineflow.repository.UserRepository;
@@ -29,18 +30,18 @@ public class PaymentServiceImpl implements PaymentService{
     @Transactional
     public String processPayment(Long bookingId){
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(()->
-                new RuntimeException("Booking not found"));
+                new CineflowException("booking.not.found"));
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(()-> new RuntimeException("User not found"));
+                .orElseThrow(()-> new CineflowException("user.not.found"));
 
         if(!booking.getUser().getId().equals(currentUser.getId())){
-            throw new RuntimeException("Unauthorized payment attempt");
+            throw new CineflowException("unauthorized.action");
         }
         if(booking.getPaymentStatus()!= PaymentStatus.PENDING) {
-            throw new RuntimeException("Payment already processed");
+            throw new CineflowException("payment.already.processed");
         }
 
         boolean success = Math.random() < 0.8;
@@ -58,7 +59,7 @@ public class PaymentServiceImpl implements PaymentService{
             showSeatRepository.saveAll(seats);
             booking.setPaymentStatus(PaymentStatus.FAILED);
             bookingRepository.save(booking);
-            return "Payment Failed";
+            return "payment.failed";
         }
 
         List<ShowSeat> seats = booking.getBookingSeats().stream().map(BookingSeat::getShowSeat).toList();
@@ -74,6 +75,6 @@ public class PaymentServiceImpl implements PaymentService{
         booking.setStatus(BookingStatus.CONFIRMED);
         booking.setPaymentId("PAY_"+System.currentTimeMillis());
         bookingRepository.save(booking);
-        return "Payment Successful";
+        return "payment.successful";
     }
 }

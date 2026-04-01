@@ -6,9 +6,7 @@ import com.cineflow.dto.UserRequest;
 import com.cineflow.dto.UserResponse;
 import com.cineflow.entity.User;
 import com.cineflow.enums.Role;
-import com.cineflow.exception.InvalidCredentialsException;
-import com.cineflow.exception.UserAlreadyExistsException;
-import com.cineflow.exception.UserNotFoundException;
+import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.UserRepository;
 import com.cineflow.security.JwtUtil;
 import org.modelmapper.ModelMapper;
@@ -31,7 +29,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserResponse register (UserRequest request){
         userRepository.findByEmail(request.getEmail()).ifPresent(u->{
-                throw new UserAlreadyExistsException("User already exists");});
+                throw new CineflowException("user.already.exists");
+        });
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
@@ -49,9 +48,9 @@ public class UserServiceImpl implements UserService{
     @Override
     public LoginResponse login(LoginRequest request){
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(()-> new UserNotFoundException("User not found"));
+                .orElseThrow(()-> new CineflowException("user.not.registered"));
         if(!passwordEncoder.matches(request.getPassword(),user.getPassword())){
-            throw new InvalidCredentialsException("Invalid password");
+            throw new CineflowException("invalid.credentials");
         }
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
         return new LoginResponse(token, user.getEmail(),user.getRole().name());
@@ -60,7 +59,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserResponse getUserByEmail(String email){
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()-> new UserNotFoundException("User not found"));
+                .orElseThrow(()-> new CineflowException("user.not.found"));
 
         return modelMapper.map(user, UserResponse.class);
     }

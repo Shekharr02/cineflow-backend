@@ -13,16 +13,16 @@ import java.time.LocalDateTime;
 @Setter
 public class ShowRequest {
 
-    @NotNull(message = "Movie ID is required")
+    @NotNull(message = "{show.movieId.required}")
     private Long movieId;
 
-    @NotNull(message = "Screen ID is required")
+    @NotNull(message = "{Screen ID is required}")
     private Long screenId;
 
-    @NotNull(message = "Show time is required")
-    @Future(message = "Show time must be in future")
+    @NotNull(message = "{show.time.required}")
+    @Future(message = "{show.time.future}")
     private LocalDateTime showTime;
 
-    @NotBlank(message = "Language is required")
+    @NotBlank(message = "{show.language.required}")
     private String language;
 }

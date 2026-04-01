@@ -1,6 +1,5 @@
 package com.cineflow.repository;
 
-import com.cineflow.dto.ShowResponse;
 import com.cineflow.entity.Show;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;

@@ -6,11 +6,11 @@ import com.cineflow.entity.Screen;
 import com.cineflow.entity.Seat;
 import com.cineflow.entity.Theatre;
 import com.cineflow.enums.SeatType;
+import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.ScreenRepository;
 import com.cineflow.repository.SeatRepository;
 import com.cineflow.repository.TheatreRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,11 +28,11 @@ public class ScreenServiceImpl implements ScreenService{
     @Transactional
     public ScreenResponse createScreen(ScreenRequest request){
         if(screenRepository.existsByNameIgnoreCaseAndTheatreId(request.getName(), request.getTheatreId())){
-            throw new RuntimeException("Screen already exists in theatre");
+            throw new CineflowException("screen.already.exists");
         }
         Theatre theatre = theatreRepository.findById(request.getTheatreId())
                 .orElseThrow(()->
-                        new RuntimeException("Theatre not found"));
+                        new CineflowException("theatre.not.found"));
         Screen screen = new Screen();
         screen.setName(request.getName());
         screen.setCapacity(request.getCapacity());
@@ -61,7 +61,7 @@ public class ScreenServiceImpl implements ScreenService{
     @Override
     public ScreenResponse getScreenById(Long id){
         Screen screen = screenRepository.findById(id).orElseThrow(()->
-                new RuntimeException("Screen not found"));
+                new CineflowException("screen.not.found"));
         return mapToResponse(screen);
     }
     private String generateRowLabel(int index){

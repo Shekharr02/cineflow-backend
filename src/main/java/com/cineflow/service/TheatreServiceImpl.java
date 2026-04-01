@@ -3,10 +3,10 @@ package com.cineflow.service;
 import com.cineflow.dto.TheatreRequest;
 import com.cineflow.dto.TheatreResponse;
 import com.cineflow.entity.Theatre;
+import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.TheatreRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +22,8 @@ public class TheatreServiceImpl implements TheatreService{
     @Override
     @Transactional
     public TheatreResponse createTheatre(TheatreRequest request){
-        if(theatreRepository.existsByNameAndLocation(request.getName(),request.getLocation())){
-            throw new RuntimeException("Theatre already exists");
+        if(theatreRepository.existsByNameAndLocationIgnoreCase(request.getName(),request.getLocation())){
+            throw new CineflowException("theatre.exists");
         }
 
         Theatre theatre = new Theatre();
@@ -48,7 +48,7 @@ public class TheatreServiceImpl implements TheatreService{
     @Override
     public List<TheatreResponse> getByCity(String city){
         List<Theatre> theatres = theatreRepository.findByLocationIgnoreCase(city);
-        if(theatres.isEmpty()) throw new RuntimeException("No theatres fond in this city");
+        if(theatres.isEmpty()) throw new CineflowException("theatre.not.foundInCity");
 
         return theatres.stream().map(this::mapToResponse).toList();
     }

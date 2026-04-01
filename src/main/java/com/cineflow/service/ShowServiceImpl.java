@@ -4,6 +4,7 @@ import com.cineflow.dto.ShowRequest;
 import com.cineflow.dto.ShowResponse;
 import com.cineflow.entity.*;
 import com.cineflow.enums.ShowSeatStatus;
+import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,13 @@ public class ShowServiceImpl implements ShowService{
     public ShowResponse createShow(ShowRequest request){
 
         if (showRepository.existsByScreenIdAndShowTime(request.getScreenId(),request.getShowTime())){
-            throw new RuntimeException("Show already exists at this time");
+            throw new CineflowException("screen.occupied");
         }
         Movie movie = movieRepository.findById(request.getMovieId())
-                .orElseThrow(()-> new RuntimeException("Movie not found"));
+                .orElseThrow(()-> new CineflowException("movie.not.available"));
 
         Screen screen = screenRepository.findById(request.getScreenId())
-                .orElseThrow(()-> new RuntimeException("Screen not found"));
+                .orElseThrow(()-> new CineflowException("screen.not.found"));
 
         Show show = new Show();
         show.setMovie(movie);

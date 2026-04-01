@@ -2,7 +2,6 @@ package com.cineflow.service;
 
 import com.cineflow.dto.TheatreRequest;
 import com.cineflow.dto.TheatreResponse;
-import com.cineflow.entity.Theatre;
 
 import java.util.List;
 

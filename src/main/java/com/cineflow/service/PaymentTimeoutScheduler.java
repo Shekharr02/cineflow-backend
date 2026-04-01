@@ -2,7 +2,6 @@ package com.cineflow.service;
 
 import com.cineflow.entity.Booking;
 import com.cineflow.entity.BookingSeat;
-import com.cineflow.entity.Show;
 import com.cineflow.entity.ShowSeat;
 import com.cineflow.enums.PaymentStatus;
 import com.cineflow.enums.ShowSeatStatus;

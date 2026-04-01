@@ -29,7 +29,7 @@ public class Movie {
     private List<String> languages;
     private String censorRating;
 
-    @Column(length = 1000)
+    @Column(length = 2000)
     private String description;
     private LocalDate releaseDate;
     private String imageUrl;

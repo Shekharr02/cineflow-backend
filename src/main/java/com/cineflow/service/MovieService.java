@@ -2,10 +2,7 @@ package com.cineflow.service;
 
 import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
-import com.cineflow.entity.Movie;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 public interface MovieService {
 

@@ -11,9 +11,9 @@ import java.util.List;
 @Setter
 public class BookingRequest {
 
-    @NotNull(message = "Show ID is required")
+    @NotNull(message = "{booking.showId.required}")
     private Long showId;
 
-    @NotEmpty(message = "Seats are required")
+    @NotEmpty(message = "{booking.seats.min}")
     private List<Long> showSeatIds;
 }

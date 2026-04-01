@@ -2,7 +2,6 @@ package com.cineflow.service;
 
 import com.cineflow.dto.ShowRequest;
 import com.cineflow.dto.ShowResponse;
-import com.cineflow.entity.Show;
 
 import java.util.List;
 
