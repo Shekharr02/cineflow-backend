@@ -6,6 +6,7 @@ import com.cineflow.entity.User;
 import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.UserRepository;
 import com.cineflow.service.BookingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +22,7 @@ public class BookingController {
     private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<BookingResponse> book(@RequestBody BookingRequest request){
+    public ResponseEntity<BookingResponse> book(@Valid @RequestBody BookingRequest request){
         return ResponseEntity.ok(bookingService.bookTickets(request));
     }
 

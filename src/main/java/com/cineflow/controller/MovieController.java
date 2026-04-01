@@ -4,6 +4,7 @@ import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
 import com.cineflow.service.MovieService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class MovieController {
     private MovieService movieService;
 
     @PostMapping("/add")
-    public MovieResponse addMovie(@RequestBody MovieRequest request){
+    public MovieResponse addMovie(@Valid @RequestBody MovieRequest request){
         return movieService.addMovie(request);
     }
 
