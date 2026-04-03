@@ -25,4 +25,16 @@ public class ShowRequest {
 
     @NotBlank(message = "{show.language.required}")
     private String language;
+
+    @NotNull(message = "{show.price.required}")
+    @Min(value = 0, message = "{show.price.negative}")
+    private Double regularPrice;
+
+    @NotNull(message = "{show.price.required}")
+    @Min(value = 0, message = "{show.price.negative}")
+    private Double premiumPrice;
+
+    @NotNull(message = "{show.price.required}")
+    @Min(value = 0, message = "{show.price.negative}")
+    private Double reclinerPrice;
 }

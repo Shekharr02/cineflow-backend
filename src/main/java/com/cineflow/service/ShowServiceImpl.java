@@ -41,7 +41,7 @@ public class ShowServiceImpl implements ShowService{
         show.setShowTime(request.getShowTime());
         Show savedShow = showRepository.save(show);
 
-        createShowSeats(savedShow);
+        createShowSeats(savedShow, request);
 
         ShowResponse res = new ShowResponse();
         res.setId(savedShow.getId());
@@ -51,7 +51,7 @@ public class ShowServiceImpl implements ShowService{
         return res;
     }
 
-    private void createShowSeats(Show show){
+    private void createShowSeats(Show show, ShowRequest request){
         List<Seat> seats = seatRepository.findByScreenId(show.getScreen().getId());
         List<ShowSeat> showSeats = new ArrayList<>();
 
@@ -61,9 +61,9 @@ public class ShowServiceImpl implements ShowService{
             ss.setSeat(seat);
 
             switch(seat.getType()){
-                case RECLINER -> ss.setPrice(500);
-                case PREMIUM -> ss.setPrice(300);
-                case REGULAR -> ss.setPrice(150);
+                case RECLINER -> ss.setPrice(request.getReclinerPrice());
+                case PREMIUM -> ss.setPrice(request.getPremiumPrice());
+                case REGULAR -> ss.setPrice(request.getRegularPrice());
             }
             ss.setStatus(ShowSeatStatus.AVAILABLE);
             showSeats.add(ss);
