@@ -2,6 +2,8 @@ package com.cineflow.service;
 
 import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
+import com.cineflow.dto.RatingRequest;
+import com.cineflow.dto.RatingResponse;
 import org.springframework.data.domain.Page;
 
 public interface MovieService {
@@ -23,4 +25,6 @@ public interface MovieService {
             int size,
             String sortBy,
             String direction);
+
+    RatingResponse rateMovie(Long movieId, RatingRequest request);
 }

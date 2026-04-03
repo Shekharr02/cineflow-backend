@@ -2,12 +2,15 @@ package com.cineflow.controller;
 
 import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
+import com.cineflow.dto.RatingRequest;
+import com.cineflow.dto.RatingResponse;
 import com.cineflow.service.MovieService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,6 +60,14 @@ public class MovieController {
             @RequestParam(defaultValue = "asc") String direction
     ){
         return movieService.filterMovies(name, genre, language, rating, page, size, sortBy, direction);
+    }
+    @PostMapping("/{id}/rate")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<RatingResponse> rateMovie(
+            @PathVariable Long id,
+            @Valid @RequestBody RatingRequest request){
+        RatingResponse response = movieService.rateMovie(id, request);
+        return ResponseEntity.ok(response);
     }
 
 }

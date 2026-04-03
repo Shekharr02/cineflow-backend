@@ -2,9 +2,16 @@ package com.cineflow.service;
 
 import com.cineflow.dto.MovieRequest;
 import com.cineflow.dto.MovieResponse;
+import com.cineflow.dto.RatingRequest;
+import com.cineflow.dto.RatingResponse;
 import com.cineflow.entity.Movie;
+import com.cineflow.entity.MovieRating;
+import com.cineflow.entity.User;
 import com.cineflow.exception.CineflowException;
+import com.cineflow.repository.BookingRepository;
+import com.cineflow.repository.MovieRatingRepository;
 import com.cineflow.repository.MovieRepository;
+import com.cineflow.repository.UserRepository;
 import com.cineflow.specification.MovieSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +20,23 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 public class MovieServiceImpl implements MovieService{
+
+    @Autowired
+    private MovieRatingRepository movieRatingRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private MovieRepository movieRepository;
@@ -96,4 +114,47 @@ public class MovieServiceImpl implements MovieService{
             modelMapper.map(movie, MovieResponse.class)
         );
     }
+
+    @Override
+    @Transactional
+    public RatingResponse rateMovie(Long movieId, RatingRequest request){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new CineflowException("user.not.found"));
+
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(()-> new CineflowException("movie.not.available"));
+
+        if(movieRatingRepository.existsByUserIdAndMovieId(user.getId(), movieId)){
+            throw new CineflowException("movie.already.rated");
+        }
+        long validBookings = bookingRepository.countCompletedBookings(user.getId(),movieId);
+        if(validBookings==0){
+            throw new CineflowException("movie.not.watched");
+        }
+
+        MovieRating rating = new MovieRating();
+        rating.setUser(user);
+        rating.setMovie(movie);
+        rating.setRatingValue(request.getRatingValue());
+        rating.setReviewMessage(request.getReviewMessage());
+        movieRatingRepository.save(rating);
+
+        Double avgRating = movieRatingRepository.getAverageRatingForMovie(movieId);
+        double roundedRating = movie.getRating();
+        if(avgRating!=null) {
+            roundedRating = Math.round(avgRating*10.0)/10.0;
+            movie.setRating(roundedRating);
+            movieRepository.save(movie);
+        }
+        return new RatingResponse(
+                movie.getId(),
+                movie.getName(),
+                rating.getRatingValue(),
+                rating.getReviewMessage(),
+                roundedRating
+        );
+    }
+
 }
