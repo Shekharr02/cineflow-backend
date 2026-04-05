@@ -12,6 +12,7 @@ import com.cineflow.repository.BookingRepository;
 import com.cineflow.repository.ShowSeatRepository;
 import com.cineflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentServiceImpl implements PaymentService{
 
     private final BookingRepository bookingRepository;
@@ -59,6 +61,7 @@ public class PaymentServiceImpl implements PaymentService{
             showSeatRepository.saveAll(seats);
             booking.setPaymentStatus(PaymentStatus.FAILED);
             bookingRepository.save(booking);
+            log.info("Payment simulated as FAILED for Booking ID {}. Seats released.",bookingId);
             return "payment.failed";
         }
 
@@ -75,6 +78,7 @@ public class PaymentServiceImpl implements PaymentService{
         booking.setStatus(BookingStatus.CONFIRMED);
         booking.setPaymentId("PAY_"+System.currentTimeMillis());
         bookingRepository.save(booking);
+        log.info("Payment simulated as SUCCESSFUL for Booking ID {}. Booking confirmed", bookingId);
         return "payment.successful";
     }
 }

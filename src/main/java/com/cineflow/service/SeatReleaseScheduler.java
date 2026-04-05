@@ -2,6 +2,7 @@ package com.cineflow.service;
 
 import com.cineflow.repository.ShowSeatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SeatReleaseScheduler {
     private final ShowSeatRepository showSeatRepository;
 
@@ -20,7 +22,7 @@ public class SeatReleaseScheduler {
         int count = showSeatRepository.releaseExpiredSeats(expiryTime);
 
         if(count > 0){
-            System.out.println("Released seat: "+count);
+            log.info("Scheduler executed: Released {} expired seats to AVAILABLE status.", count);
         }
     }
 }

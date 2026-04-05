@@ -13,6 +13,7 @@ import com.cineflow.repository.MovieRatingRepository;
 import com.cineflow.repository.MovieRepository;
 import com.cineflow.repository.UserRepository;
 import com.cineflow.specification.MovieSpecification;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Slf4j
 public class MovieServiceImpl implements MovieService{
 
     @Autowired
@@ -127,10 +129,12 @@ public class MovieServiceImpl implements MovieService{
                 .orElseThrow(()-> new CineflowException("movie.not.available"));
 
         if(movieRatingRepository.existsByUserIdAndMovieId(user.getId(), movieId)){
+            log.warn("Rating failed: User ID {} already rated Movie ID {}", user.getId(), movieId);
             throw new CineflowException("movie.already.rated");
         }
         long validBookings = bookingRepository.countCompletedBookings(user.getId(),movieId);
         if(validBookings==0){
+            log.warn("Rating failed: User ID {} has not watched Movie ID {}", user.getId(), movieId);
             throw new CineflowException("movie.not.watched");
         }
 
@@ -148,6 +152,7 @@ public class MovieServiceImpl implements MovieService{
             movie.setRating(roundedRating);
             movieRepository.save(movie);
         }
+        log.info("User ID {} successfully rated Movie ID {} with {} stars.", user.getId(), movieId, request.getRatingValue());
         return new RatingResponse(
                 movie.getId(),
                 movie.getName(),

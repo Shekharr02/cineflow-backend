@@ -2,6 +2,7 @@ package com.cineflow.exception;
 
 import com.cineflow.dto.ErrorResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +17,14 @@ import java.util.Map;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex){
+        log.warn("Validation failed for incoming request: {}", ex.getMessage());
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error->{
@@ -36,8 +39,10 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(CineflowException.class)
     public ResponseEntity<ErrorResponse> handleCineFlowException(CineflowException ex){
+        log.warn("Business logic exception: {}", ex.getMessageKey());
         String message = messageSource.getMessage(ex.getMessage(),null, Locale.getDefault());
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
@@ -50,6 +55,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex){
+        log.error("An unexpected internal server error occurred", ex);
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),

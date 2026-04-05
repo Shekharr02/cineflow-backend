@@ -9,6 +9,7 @@ import com.cineflow.enums.ShowSeatStatus;
 import com.cineflow.exception.CineflowException;
 import com.cineflow.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingServiceImpl implements BookingService{
 
     private final BookingRepository bookingRepository;
@@ -35,12 +37,15 @@ public class BookingServiceImpl implements BookingService{
                 .getContext()
                 .getAuthentication()
                 .getName();
-
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CineflowException("user.not.found"));
+                .orElseThrow(() -> {
+                    return new CineflowException("user.not.found");
+                });
 
         Show show = showRepository.findById(request.getShowId())
-                .orElseThrow(() -> new CineflowException("show.not.found"));
+                .orElseThrow(() -> {
+                    return new CineflowException("show.not.found");
+                });
 
         Set<Long> uniqueSeats = new HashSet<>(request.getShowSeatIds());
         if (uniqueSeats.size() != request.getShowSeatIds().size()) {
@@ -54,9 +59,11 @@ public class BookingServiceImpl implements BookingService{
 
         for (ShowSeat seat : seats) {
             if (!seat.getShow().getId().equals(show.getId())) {
+                log.warn("User {} attempted to book seat {} not belonging to show {}", email, seat.getId(), show.getId());
                 throw new CineflowException("seat.not.belongs.to.show");
             }
             if (seat.getStatus() != ShowSeatStatus.AVAILABLE) {
+                log.warn("User {} attempted to book unavailable seat: {}", email, seat.getSeat().getSeatNumber());
                 throw new CineflowException("seat.not.available");
             }
             seat.setStatus(ShowSeatStatus.HELD);
@@ -88,6 +95,7 @@ public class BookingServiceImpl implements BookingService{
         List<String> seatNumbers = seats.stream().map(
                 s -> s.getSeat().getSeatNumber()).toList();
 
+        log.info("Successfully created Booking ID {} for User ID {}", saved.getId(), user.getId());
         return new BookingResponse(saved.getId(),
                 show.getMovie().getName(),
                 show.getScreen().getTheatre().getName(),

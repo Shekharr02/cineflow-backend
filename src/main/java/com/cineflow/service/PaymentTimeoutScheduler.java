@@ -8,6 +8,7 @@ import com.cineflow.enums.ShowSeatStatus;
 import com.cineflow.repository.BookingRepository;
 import com.cineflow.repository.ShowSeatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentTimeoutScheduler {
 
     private final BookingRepository bookingRepository;
@@ -28,6 +30,7 @@ public class PaymentTimeoutScheduler {
         List<Booking> pendingBookings = bookingRepository.findByPaymentStatus(PaymentStatus.PENDING);
         for(Booking booking : pendingBookings){
             if (booking.getBookingTime().isBefore(LocalDateTime.now().minusMinutes(5))){
+                log.info("Scheduler: Payment timeout for Booking ID {}. Canceling booking and releasing seats.", booking.getId());
                 List<ShowSeat> seats = booking.getBookingSeats().stream().map(BookingSeat::getShowSeat).toList();
 
                 for(ShowSeat seat : seats){
